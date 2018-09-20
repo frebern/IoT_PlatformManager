@@ -86,7 +86,7 @@ object Detector {
     (permit.map(_.assigns), deny.map(_.assigns))
   }
 
-  def processConflictDetect(originalPolicyPath:String, modifiedPolicyPath:String, debug:Boolean = false) = {
+  def processConflictDetect(originalPolicyPath:String, modifiedPolicyPath:String, debug:Boolean = false): Pair4J = {
 //    A. 기존 정책 파일에 대해 2~5를 수행한다.
 //      OldPolicy_permit: 기존 정책에서 Permit이 나오는 모든 케이스
 //      OldPolicy_deny: 기존 정책에서 Deny가 나오는 모든 케이스
@@ -128,8 +128,8 @@ object Detector {
 
   }
 
-  //Debug - 그냥 디버그용이라 long parameter 무시
-  private def printReport(oldPermit: Set[List[Long]], oldDeny: Set[List[Long]], newPermit: Set[List[Long]], newDeny: Set[List[Long]], permitButNotPermit: Set[List[Long]], denyButNotDeny: Set[List[Long]], notPermitButPermit: Set[List[Long]], notDenyButDeny: Set[List[Long]], allConflictCases: Set[List[Long]], dictionary: Map[Long, String]) = {
+  //Debug - 그냥 디버그용이라 long parameter smell은 무시
+  private def printReport(oldPermit: Set[List[Long]], oldDeny: Set[List[Long]], newPermit: Set[List[Long]], newDeny: Set[List[Long]], permitButNotPermit: Set[List[Long]], denyButNotDeny: Set[List[Long]], notPermitButPermit: Set[List[Long]], notDenyButDeny: Set[List[Long]], allConflictCases: Set[List[Long]], dictionary: Map[Long, String]): Unit = {
     println("===================================REPORT=======================================")
     println("Dictionary: " + dictionary)
     println("Op : " + oldPermit)
