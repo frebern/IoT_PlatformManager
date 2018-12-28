@@ -27,6 +27,9 @@ public class PEPRegistrationService {
     PEPRepository pepRepository;
 
     @Autowired
+    PDPRepository pdpRepository;
+
+    @Autowired
     GroupMemberRepository groupMemberRepository;
 
     @Autowired
@@ -36,23 +39,60 @@ public class PEPRegistrationService {
     public Future<JsonObject> addPEPtoPEPGroup(JsonObject object) {
         System.out.println(object);
         String userId = object.get("userId").getAsString();
-        JsonElement pepId = object.get("pepId");
+        JsonElement pepProfile = object.get("pepProfile");
         JsonElement pepGroupId = object.get("pepGroupId");
         User user = userRepository.findOne(userId);
         JsonObject response = new JsonObject();
         if (user == null) {
-            response.addProperty("error", "Not found user");
-        } else if (pepGroupId != null && pepId != null && object.get("pepGroupPW") != null) {
-            PEP pep = pepRepository.findOneByPepId(pepId.getAsString());
-            createAndAddGroup(object, user, pep, response);
-        } else if (pepId == null) {
-            System.out.println("!!!");
-            addGroupMember(object, user, pepGroupId.getAsLong(), response);
-        } else {
-            System.out.println(pepId.getAsString());
-            PEP pep = pepRepository.findOneByPepId(pepId.getAsString());
-            addGroup(object, pep, response);
+            response.addProperty("success", false);
+            response.addProperty("reason","User not found");
         }
+        // Step 7.a. PEP를 등록하는 경우
+        else if (pepProfile != null) {
+
+            System.out.println("Step 7.a");
+            System.out.println("PEP Profile : "+pepProfile.getAsString());
+            PEP pep = new PEP();
+            JsonObject pep_json = pepProfile.getAsJsonObject();
+            pep.setPepId(pep_json.get("pepId").getAsString());
+            pep.setPepName(pep_json.get("pepName").getAsString());
+            pep.setIp(pep_json.get("pepIp").getAsString());
+
+            // 일단 Default PDP로 설정.
+            PDP defaultPDP = pdpRepository.findOne(1);
+            pep.setPdp(defaultPDP);
+
+            PEPGroup pepGroup = null;
+            // Step 7.a.1. 새 그룹 생성
+            if(object.get("pepGroupId") == null) {
+                String groupName = object.get("pepGroupName").getAsString();
+                String groupPW = object.get("pepGroupPW").getAsString();
+                pepGroup = createPEPGroup(user, groupName, groupPW); // PEPGroup save 됨.
+                addGroupMember(user, pepGroup.getPepGroupId(), pepGroup.getGroupPW(), response); // GroupMember save 됨.
+            }
+            // Step 7.a.2. 기존 그룹에 추가
+            else {
+                long groupId = pepGroupId.getAsLong();
+                pepGroup = pepGroupRepository.findOne(groupId);
+            }
+
+            JsonElement success = response.get("success"); // null이거나 true면 문제없음.
+            if(success == null || success.getAsBoolean())
+                addPEPToPEPGroup(pep, pepGroup, response); // PEP save 됨.
+
+        }
+        // Step 7.b. PEP가 이미 등록된 경우, 사용자 인증 절차 진행 후 그룹에 사용자 가입
+        else if (pepGroupId != null) {
+            System.out.println("Step 7.b");
+            String pepGroupPW = object.get("pepGroupPW").getAsString();
+            addGroupMember(user, pepGroupId.getAsLong(), pepGroupPW, response); // GroupMember save 됨.
+        }
+        else { // 페이로드에 pepProfile도 없고, pepGroupId도 없는 경우
+            System.out.println("Bad Request");
+            response.addProperty("success", false);
+            response.addProperty("reason", "Bad Request");
+        }
+
         return new AsyncResult<>(response);
     }
 
@@ -60,46 +100,19 @@ public class PEPRegistrationService {
     public Future<JsonObject> searchPEPGroup(String userId, String pepId) {
         User user = userRepository.findOne(userId);
         PEP pep = pepRepository.findOne(pepId);
-        Gson gson = new GsonBuilder().create();
         JsonObject response = new JsonObject();
         if (user == null) {
-            response.addProperty("error", "wrong user");
-        } else if (pep == null) {
-            response.addProperty("error", "no pep");
-        } else if (pep.getPepGroup() != null) { // TODO: NullPointerException 해결
+            response.addProperty("error", "No User info");
+        } else if (pep != null && pep.getPepGroup() != null) { // TODO: NullPointerException 해결
             PEPGroup pepGroup = pepGroupRepository.findByOwnerAndPEP(user, pep);
             response.addProperty("hasGroup", true);
-            response.addProperty("pepGroup", pepGroup.getPepGroupId());
+            response.addProperty("pepGroupId", pepGroup.getPepGroupId());
         } else {
             response.addProperty("hasGroup", false);
-            List<PEPGroup> pepGroups = pepGroupRepository.findPEPGroupsByOwner(user);
-            response.addProperty("pepGroupId", gson.toJson(pepGroups.stream().map(pepGroup -> pepGroup.getPepGroupId()).toArray()));
+            // 아래 두줄은 필요 없을 듯.
+//            List<PEPGroup> pepGroups = pepGroupRepository.findPEPGroupsByOwner(user);
+//            response.addProperty("pepGroupList", gson.toJson(pepGroups.stream().map(pepGroup -> pepGroup.getPepGroupId()).toArray()));
         }
-
-        return new AsyncResult<>(response);
-    }
-
-    //TODO: 세션키 확인 후 PEPProfile 저장
-    @Async
-    public Future<JsonObject> savePEPProfile(JsonObject request) {
-        String sessionKey = request.get("sessionKey").getAsString();
-        String pepId = request.get("pepId").getAsString();
-        String pepProfile = request.get("pepProfile").getAsString();
-        JsonObject response = new JsonObject();
-
-        Gson gson = new GsonBuilder().create();
-        JsonObject pepProfileJson = gson.fromJson(pepProfile, JsonObject.class);
-        PEP pep = pepRepository.findOneByPepId(pepId);
-        pep.setIp(pepProfileJson.get("ip").getAsString());
-        JsonArray deviceProfiles = pepProfileJson.getAsJsonArray("deviceProfiles");
-        List<JsonObject> devices = new LinkedList<>();
-        deviceProfiles.forEach(jsonElement -> {
-            devices.add(jsonElement.getAsJsonObject());
-        });
-
-        DeviceRegistrationController con = new DeviceRegistrationController();
-        con.updateDevice(pep, devices);
-
         return new AsyncResult<>(response);
     }
 
@@ -109,44 +122,33 @@ public class PEPRegistrationService {
         return pepGroup;
     }
 
-    private void addGroup(JsonObject object, PEP pep, JsonObject response) {
-        long pepGroupId = object.get("pepGroupId").getAsLong();
-        PEPGroup pepGroup = pepGroupRepository.findOne(pepGroupId);
+    private void addPEPToPEPGroup(PEP pep, PEPGroup pepGroup, JsonObject response) {
         pep.setPepGroup(pepGroup);
         pepRepository.saveAndFlush(pep);
-        returnSessionKey(pep.pepId, response);
+        response.addProperty("success",true);
     }
 
+    @Deprecated
+    // Step 8 이후로 삭제했기 때문에 이제 필요없음.
     private void returnSessionKey(String pepId, JsonObject response){
         String otpKey = OTP.create(pepId);
         sessionKeyRespository.save(new SessionKey(pepId, otpKey));
         response.addProperty("sessionKey", otpKey);
     }
 
-    private void createAndAddGroup(JsonObject object, User user, PEP pep, JsonObject response) {
-        String pepGroupName = object.get("pepGroupName").getAsString();
-        String pepGroupPW = object.get("pepGroupPW").getAsString();
-        PEPGroup pepGroup = createPEPGroup(user, pepGroupName, pepGroupPW);
-        pep.setPepGroup(pepGroup);
-        pepRepository.saveAndFlush(pep);
-        GroupMember groupMember = new GroupMember(user, pepGroup);
-        groupMemberRepository.saveAndFlush(groupMember);
-        returnSessionKey(pep.pepId, response);
-    }
-
-    private void addGroupMember(JsonObject object, User user, long pepGroudId, JsonObject response) {
-        String pepGroupPW = object.get("groupPW").getAsString();
-        PEPGroup pepGroup = pepGroupRepository.findOne(pepGroudId);
+    private void addGroupMember(User user, long pepGroupId, String pepGroupPW, JsonObject response) {
+        PEPGroup pepGroup = pepGroupRepository.findOne(pepGroupId);
         if (checkPEPGroupPW(pepGroup, pepGroupPW)) {
             GroupMember groupMember = new GroupMember(user, pepGroup);
             groupMemberRepository.saveAndFlush(groupMember);
-            response.addProperty("authenticated", true);
+            response.addProperty("success", true);
         } else {
-            response.addProperty("authenticated", false);
+            response.addProperty("success", false);
+            response.addProperty("reason", "Authentication Failed : Wrong PEPGroup Password");
         }
     }
 
-    //TODO: 비밀번호 인증 방법 변경 필요
+    //TODO: 비밀번호 인증 방법 변경 필요 ... ?
     private boolean checkPEPGroupPW(PEPGroup pepGroup, String pepGroupPW) {
         return pepGroup.getGroupPW().equals(pepGroupPW);
     }

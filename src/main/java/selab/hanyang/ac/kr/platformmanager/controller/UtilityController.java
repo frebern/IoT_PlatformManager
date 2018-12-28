@@ -38,6 +38,11 @@ public class UtilityController {
     String getPEPGroups(HttpServletRequest request, HttpServletResponse httpResponse){
 
         RequestParser parser = new RequestParser(request);
+
+        /* TODO
+         * 일단 유저 정보 보내게끔 하긴 했는데
+         * 이거 가지고 세션체크하는거 LoginController에서 기능 추출해서 별도의 매니저 클래스 만들어야 함.
+         * */
         String userId = parser.getAsString("userId");
         String sessionKey = parser.getAsString("sessionKey");
 
@@ -50,6 +55,7 @@ public class UtilityController {
 
             // 2. Group 정보 꺼내고
             long pepGroupId = grp.getPepGroupId();
+            String pepGroupName = grp.getPepGroupName();
             JsonArray pepProfiles = new JsonArray();
 
             // A ~ D : pepProfiles 만들기
@@ -58,6 +64,7 @@ public class UtilityController {
             peps.forEach(pep->{
 
                 // B. 정보 꺼내고
+                String pepId = pep.getId();
                 String ip = pep.getIp();
                 JsonArray deviceProfiles = new JsonArray();
 
@@ -103,6 +110,7 @@ public class UtilityController {
 
                 // C. pepProfile 만들어주고
                 JsonObject pepProfile = new JsonObject();
+                pepProfile.addProperty("pepId", pepId);
                 pepProfile.addProperty("ip", ip);
                 pepProfile.add("deviceProfiles", deviceProfiles);
 
@@ -114,6 +122,7 @@ public class UtilityController {
             // 3. group 만들어주고
             JsonObject group = new JsonObject();
             group.addProperty("pepGroupId", pepGroupId);
+            group.addProperty("pepGroupName", pepGroupName);
             group.add("pepProfiles",pepProfiles);
 
             // 4. JsonArray에 각각 추가

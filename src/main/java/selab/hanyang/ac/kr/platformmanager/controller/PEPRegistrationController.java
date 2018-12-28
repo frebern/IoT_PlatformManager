@@ -19,39 +19,27 @@ import java.util.concurrent.ExecutionException;
 public class PEPRegistrationController {
 
     @Autowired
-    PEPGroupRepository pepGroupRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    PEPRepository pepRepository;
-
-    @Autowired
-    GroupMemberRepository groupMemberRepository;
-
-    @Autowired
     PEPRegistrationService pepRegistrationService;
+
+    private JsonObject failed(String reason){
+        JsonObject response = new JsonObject();
+        response.addProperty("success", false);
+        response.addProperty("reason", reason);
+        return response;
+    }
 
     @CrossOrigin(origins = "http://localhost")
     @PostMapping(path = "/groups", consumes = "application/json", produces = "application/json")
     public @ResponseBody String addPEPtoPEPGroup(@RequestBody String request) {
-
         RequestParser parser = new RequestParser(request);
         JsonObject object = parser.getAsJsonObject();
         JsonObject response = null;
         Gson gson = new GsonBuilder().create();
         try {
             response = pepRegistrationService.addPEPtoPEPGroup(object).get();
-            return gson.toJson(response);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-            response = new JsonObject();
-            response.addProperty("error" , "ToJson error");
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            response = new JsonObject();
-            response.addProperty("error" , "ToJson error");
+            response = failed("In addPEPtoPEPGroup : Future execution failed");
         }
         return gson.toJson(response);
     }
@@ -64,14 +52,9 @@ public class PEPRegistrationController {
         JsonObject response = null;
         try {
             response = pepRegistrationService.searchPEPGroup(userId, pepId).get();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-            response = new JsonObject();
-            response.addProperty("error" , "ToJson error");
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            response = new JsonObject();
-            response.addProperty("error" , "ToJson error");
+            response = failed("In searchPEPGroup : Future execution failed");
         }
         return gson.toJson(response);
     }

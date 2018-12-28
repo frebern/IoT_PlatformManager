@@ -55,6 +55,10 @@ public class PEP {
         this.ip = ip;
     }
 
+    public void setPepId(String pepId) {
+        this.pepId = pepId;
+    }
+
     public String getIp() {
         return ip;
     }
