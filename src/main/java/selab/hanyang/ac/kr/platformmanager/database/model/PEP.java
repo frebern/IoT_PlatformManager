@@ -6,8 +6,7 @@ import javax.persistence.*;
 @Table(name = "pep")
 public class PEP {
 
-    public PEP() {
-    }
+    public PEP() {}
 
     @Id
     @Column(name = "pep_id", nullable = false)

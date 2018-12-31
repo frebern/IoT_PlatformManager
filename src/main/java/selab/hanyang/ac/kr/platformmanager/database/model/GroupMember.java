@@ -6,8 +6,7 @@ import javax.persistence.*;
 @Table(name = "group_member")
 public class GroupMember {
 
-    public GroupMember() {
-    }
+    public GroupMember() {}
 
     public GroupMember(User user, PEPGroup pepGroup) {
         this.user = user;

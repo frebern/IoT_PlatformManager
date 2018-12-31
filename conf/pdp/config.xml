@@ -1,5 +1,7 @@
 <config defaultPDP="pdp1" defaultAttributeFactory="attr"
         defaultCombiningAlgFactory="comb" defaultFunctionFactory="func">
+
+    <!-- pdp1 -->
     <pdp name="pdp1">
         <policyFinderModule class="org.wso2.balana.finder.impl.FileBasedPolicyFinderModule">
             <set>
@@ -7,6 +9,8 @@
             </set>
         </policyFinderModule>
     </pdp>
+
+    <!-- mypdp ... 뭐가 다른거지? -->
     <pdp name="mypdp">
         <attributeFinderModule class="org.wso2.balana.finder.impl.CurrentEnvModule"/>
         <attributeFinderModule class="org.wso2.balana.finder.impl.SelectorModule"/>

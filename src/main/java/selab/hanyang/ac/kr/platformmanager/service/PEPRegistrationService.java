@@ -51,32 +51,22 @@ public class PEPRegistrationService {
         else if (pepProfile != null) {
 
             System.out.println("Step 7.a");
-            System.out.println("PEP Profile : "+pepProfile.getAsString());
+            System.out.println("PEP Profile : "+pepProfile.toString());
             PEP pep = new PEP();
-            JsonObject pep_json = pepProfile.getAsJsonObject();
-            pep.setPepId(pep_json.get("pepId").getAsString());
-            pep.setPepName(pep_json.get("pepName").getAsString());
-            pep.setIp(pep_json.get("pepIp").getAsString());
+            JsonObject json_pep = pepProfile.getAsJsonObject();
+            pep.setPepId(json_pep.get("pepId").getAsString());
+            pep.setPepName(json_pep.get("pepName").getAsString());
+            pep.setIp(json_pep.get("pepIp").getAsString());
 
             // 일단 Default PDP로 설정.
             PDP defaultPDP = pdpRepository.findOne(1);
             pep.setPdp(defaultPDP);
 
-            PEPGroup pepGroup = null;
-            // Step 7.a.1. 새 그룹 생성
-            if(object.get("pepGroupId") == null) {
-                String groupName = object.get("pepGroupName").getAsString();
-                String groupPW = object.get("pepGroupPW").getAsString();
-                pepGroup = createPEPGroup(user, groupName, groupPW); // PEPGroup save 됨.
-                addGroupMember(user, pepGroup.getPepGroupId(), pepGroup.getGroupPW(), response); // GroupMember save 됨.
-            }
-            // Step 7.a.2. 기존 그룹에 추가
-            else {
-                long groupId = pepGroupId.getAsLong();
-                pepGroup = pepGroupRepository.findOne(groupId);
-            }
+            // Step 7.a. 그룹이 있다면 기존 그룹을, 없다면 새로 생성
+            PEPGroup pepGroup = getPEPGroup(object, pepGroupId, user, response);
 
-            JsonElement success = response.get("success"); // null이거나 true면 문제없음.
+            // success가 null이거나 true면 문제없음을 의미.
+            JsonElement success = response.get("success");
             if(success == null || success.getAsBoolean())
                 addPEPToPEPGroup(pep, pepGroup, response); // PEP save 됨.
 
@@ -94,6 +84,23 @@ public class PEPRegistrationService {
         }
 
         return new AsyncResult<>(response);
+    }
+
+    // Step 7.a. 그룹이 있다면 기존 그룹을, 없다면 새로 생성해서 save 한 후 반환
+    private PEPGroup getPEPGroup(JsonObject object, JsonElement pepGroupId, User user, JsonObject response) {
+        PEPGroup pepGroup;// Step 7.a.1. 새 그룹 생성
+        if(object.get("pepGroupId") == null) {
+            String groupName = object.get("pepGroupName").getAsString();
+            String groupPW = object.get("pepGroupPW").getAsString();
+            pepGroup = createPEPGroup(user, groupName, groupPW); // PEPGroup save 됨.
+            addGroupMember(user, pepGroup.getPepGroupId(), pepGroup.getGroupPW(), response); // GroupMember save 됨.
+        }
+        // Step 7.a.2. 기존 그룹에 추가
+        else {
+            long groupId = pepGroupId.getAsLong();
+            pepGroup = pepGroupRepository.findOne(groupId);
+        }
+        return pepGroup;
     }
 
     @Async

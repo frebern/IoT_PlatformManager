@@ -14,8 +14,7 @@ public class SessionKey{
     @Column
     public String sessionKey;
 
-    public SessionKey() {
-    }
+    public SessionKey() {}
 
     public SessionKey(String pepId, String sessionKey) {
         this.pepId = pepId;

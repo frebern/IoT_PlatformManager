@@ -53,7 +53,7 @@ public class LoginController {
         RequestParser parser = new RequestParser(request);
         String userId = parser.getAsString("userId");
         String userPW = parser.getAsString("userPW"); //클라이언트로부터 SHA3-256 해시되서 넘어옴.
-
+        System.out.println("UserId : "+userId);
         // 인증 절차.
         // 해당 유저가 있는가?
         boolean isUserExist = userRepo.exists(userId);
@@ -62,7 +62,7 @@ public class LoginController {
             return "{\"error\" : \"no_user\"}";
         }
         // 패스워드 맞는가?
-        boolean isPasswdValid = userRepo.checkLogin(userId, userPW);
+        boolean isPasswdValid = userRepo.checkUserIdAndPW(userId, userPW);
         if(!isPasswdValid){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return "{\"error\" : \"wrong_password\"}";

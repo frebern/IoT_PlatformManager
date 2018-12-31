@@ -7,13 +7,27 @@ import javax.persistence.*;
 public class PDP {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int _id;
+    @Column(name = "pdp_id")
+    private int pdpId;
 
     @Column(name = "name")
     private String name;
 
+    public PDP(){}
+
+    public PDP(String name){
+        this.name = name;
+    }
+
+    public PDP(int pdpId, String name){
+        this.pdpId = pdpId;
+        this.name = name;
+    }
+
     public String getName() {
         return name;
+    }
+    public int getId() {
+        return pdpId;
     }
 }

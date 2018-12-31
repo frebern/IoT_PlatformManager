@@ -59,6 +59,4 @@ public class PEPRegistrationController {
         return gson.toJson(response);
     }
 
-
-
 }
