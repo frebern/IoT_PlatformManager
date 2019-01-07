@@ -65,6 +65,7 @@ public class UtilityController {
 
                 // B. 정보 꺼내고
                 String pepId = pep.getId();
+                String pepName = pep.getName();
                 String ip = pep.getIp();
                 JsonArray deviceProfiles = new JsonArray();
 
@@ -111,6 +112,7 @@ public class UtilityController {
                 // C. pepProfile 만들어주고
                 JsonObject pepProfile = new JsonObject();
                 pepProfile.addProperty("pepId", pepId);
+                pepProfile.addProperty("pepName", pepName);
                 pepProfile.addProperty("ip", ip);
                 pepProfile.add("deviceProfiles", deviceProfiles);
 
@@ -130,7 +132,7 @@ public class UtilityController {
 
         });
 
-        System.out.println(groups.toString());//디버그코드
+//        System.out.println(groups.toString());//옵저버
         return groups.toString();
     }
 

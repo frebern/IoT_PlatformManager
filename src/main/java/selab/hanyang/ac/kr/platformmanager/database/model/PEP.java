@@ -34,6 +34,8 @@ public class PEP {
         return pdp;
     }
 
+    public String getName() {return pepName; }
+
     public PEPGroup getPepGroup() {
         return pepGroup;
     }

@@ -49,9 +49,9 @@ public class Mockup implements ApplicationRunner {
         grpMemRepo.deleteAll();
         pepRepo.deleteAll();
         sKeyRepo.deleteAll();
-        userRepo.deleteAll();
         pepGrpRepo.deleteAll();
         pdpRepo.deleteAll();
+        userRepo.deleteAll();
     }
 
     @Transactional

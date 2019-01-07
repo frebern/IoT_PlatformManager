@@ -82,8 +82,15 @@ public class LoginController {
         RequestParser parser = new RequestParser(request);
         String userId = parser.getAsString("userId");
         String sessionKey = parser.getAsString("sessionKey");
+
+        System.out.println("Debug in LoginController.java @ checkSessionKey");
+        System.out.println("userId : "+userId);
+        System.out.println("sessionKey : "+sessionKey);
+
         boolean isValid = loginUsers.stream().filter(user -> user.userId.equals(userId))
                                              .anyMatch(user -> user.sessionKey.equals(sessionKey));
+
+        System.out.println("isValid : "+isValid);
 
         return "{\"authenticated\" : "+isValid+"}";
 
