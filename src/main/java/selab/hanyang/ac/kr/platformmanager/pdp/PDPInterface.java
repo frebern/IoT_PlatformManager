@@ -16,7 +16,6 @@ import selab.hanyang.ac.kr.platformmanager.database.repository.PDPRepository;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,7 +32,6 @@ public class PDPInterface {
     @Autowired
     private PDPRepository pdpRepository;
 
-    //Thread-safe singleton
     public static PDPInterface getInstance() {
         return pdpInterface = Singleton.instance;
     }
@@ -73,9 +71,9 @@ public class PDPInterface {
     /* Deprecated */
     // API 1. evaluate
     public String evaluate(String request, String pepId) {
-        // 매번 생성하는 로드를 줄이기 위한 방법을 검토해볼 것.
-        // (예를들어, 현재 PDP와 pdpConfigName이 같다면 재활용 한다던지...
-        // 단 같은 이름이어도 config.xml이 수정될수도 있으니 유의해야함)
+        // TODO: 매번 생성하는 로드를 줄이기 위한 방법을 검토해볼 것.
+        //  (예를들어, 현재 PDP와 pdpConfigName이 같다면 재활용 한다던지...
+        //  단 같은 이름이어도 config.xml이 수정될수도 있으니 유의해야함)
         String pdpName = getPDPConfigName(pepId);
         if (pdpName != null) {
             PDP pdp = pdpHashMap.get(pdpName);
@@ -150,7 +148,7 @@ public class PDPInterface {
         }
     }
 
-    //TODO: rest api로 제공 필요
+    //TODO: REST api로 제공 필요
     public boolean reloadPDP(String pdpName) {
         try {
             pdpHashMap.put(pdpName, getPDPNewInstance(pdpName));
@@ -176,6 +174,5 @@ public class PDPInterface {
     private List<String> getPDPNameList() {
         return pdpRepository.findAllName();
     }
-
 
 }

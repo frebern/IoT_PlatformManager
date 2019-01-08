@@ -5,11 +5,11 @@
 
 	<groupId>selab.hanyang.ac.kr</groupId>
 	<artifactId>platformmanager</artifactId>
-	<version>0.9</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>platformmanager</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Hanyang Univ. SELab IoT Project - Platform Manager</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

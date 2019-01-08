@@ -20,9 +20,8 @@ import java.util.List;
 @Controller
 public class LoginController {
 
-    // 세션관리를 위한 User 클래스 (* DB용 아님)
+    // 세션관리를 위한 User 클래스 (* DB를 위한 객체는 database.User)
     private class User{
-        // 캡슐화 불필요.
         String userId;
         public String sessionKey;
         public Date timestamp; // 차후 필요하면 인증이나 세션관리에 사용.
@@ -53,7 +52,7 @@ public class LoginController {
         RequestParser parser = new RequestParser(request);
         String userId = parser.getAsString("userId");
         String userPW = parser.getAsString("userPW"); //클라이언트로부터 SHA3-256 해시되서 넘어옴.
-        System.out.println("UserId : "+userId);
+
         // 인증 절차.
         // 해당 유저가 있는가?
         boolean isUserExist = userRepo.exists(userId);
@@ -61,17 +60,18 @@ public class LoginController {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return "{\"error\" : \"no_user\"}";
         }
-        // 패스워드 맞는가?
+        // 패스워드가 맞는가?
         boolean isPasswdValid = userRepo.checkUserIdAndPW(userId, userPW);
         if(!isPasswdValid){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return "{\"error\" : \"wrong_password\"}";
         }
 
-        // 로그인 성공시. 세션키 생성해서 던져줌.
+        // 로그인 성공시, 세션키를 생성해서 반환한다.
         String sessionKey = OTP.create(userId);
         loginUsers.add(new User(userId, sessionKey));
         return "{\"sessionKey\" : \""+sessionKey+"\"}";
+
     }
 
     @CrossOrigin(origins = "http://localhost")
@@ -79,24 +79,33 @@ public class LoginController {
     public @ResponseBody
     String checkSessionKey(HttpServletRequest request, HttpServletResponse response) {
 
+        removeAllSessionExpiredUsers();
+
         RequestParser parser = new RequestParser(request);
         String userId = parser.getAsString("userId");
         String sessionKey = parser.getAsString("sessionKey");
 
-        System.out.println("Debug in LoginController.java @ checkSessionKey");
-        System.out.println("userId : "+userId);
-        System.out.println("sessionKey : "+sessionKey);
-
         boolean isValid = loginUsers.stream().filter(user -> user.userId.equals(userId))
-                                             .anyMatch(user -> user.sessionKey.equals(sessionKey));
-
-        System.out.println("isValid : "+isValid);
+                                               .filter(user -> checkTimeStamp(user.timestamp))
+                                               .anyMatch(user -> user.sessionKey.equals(sessionKey));
 
         return "{\"authenticated\" : "+isValid+"}";
-
     }
 
-    /***** For Debug (모든 것이 다 끝나면 지울 것) *****/
+    // 세션이 지났다면 제거.
+    private void removeAllSessionExpiredUsers(){
+        loginUsers.removeIf(user -> checkTimeStamp(user.timestamp));
+    }
+
+    // 로그인한지 1시간이 넘었으면 세션 만료된 것으로 판별
+    // 아직 유효하다면 true, 지났다면 false
+    private boolean checkTimeStamp(Date loginTime){
+        final long expire = 1000 * 60 * 60; // 1Hour
+        return (new Date().getTime() - loginTime.getTime())/expire == 0;
+    }
+
+    //TODO: 디버깅용. 다 끝나면 지울 것.
+    // 현재 로그인된 유저 목록을 보여준다.
     @CrossOrigin(origins = "http://localhost")
     @GetMapping(path = "/users")
     public @ResponseBody

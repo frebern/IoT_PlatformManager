@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // 리퀘스트 편하게 쓰기 위한 클래스.
 // 다른 클래스에서 Gson이나 JsonObject 신경 안쓰게 하기 위한 클래스.

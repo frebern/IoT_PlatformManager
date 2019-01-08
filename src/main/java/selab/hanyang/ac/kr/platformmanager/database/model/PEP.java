@@ -36,7 +36,7 @@ public class PEP {
 
     public String getName() {return pepName; }
 
-    public PEPGroup getPepGroup() {
+    public PEPGroup getPEPGroup() {
         return pepGroup;
     }
 

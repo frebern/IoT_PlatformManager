@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import selab.hanyang.ac.kr.platformmanager.util.RequestParser;
-import selab.hanyang.ac.kr.platformmanager.database.repository.GroupMemberRepository;
-import selab.hanyang.ac.kr.platformmanager.database.repository.PEPGroupRepository;
-import selab.hanyang.ac.kr.platformmanager.database.repository.PEPRepository;
-import selab.hanyang.ac.kr.platformmanager.database.repository.UserRepository;
 import selab.hanyang.ac.kr.platformmanager.service.PEPRegistrationService;
 
 import java.util.concurrent.ExecutionException;
@@ -20,13 +16,6 @@ public class PEPRegistrationController {
 
     @Autowired
     PEPRegistrationService pepRegistrationService;
-
-    private JsonObject failed(String reason){
-        JsonObject response = new JsonObject();
-        response.addProperty("success", false);
-        response.addProperty("reason", reason);
-        return response;
-    }
 
     @CrossOrigin(origins = "http://localhost")
     @PostMapping(path = "/groups", consumes = "application/json", produces = "application/json")
@@ -57,6 +46,14 @@ public class PEPRegistrationController {
             response = failed("In searchPEPGroup : Future execution failed");
         }
         return gson.toJson(response);
+    }
+
+
+    private JsonObject failed(String reason){
+        JsonObject response = new JsonObject();
+        response.addProperty("success", false);
+        response.addProperty("reason", reason);
+        return response;
     }
 
 }

@@ -15,7 +15,6 @@ import selab.hanyang.ac.kr.platformmanager.database.repository.PEPRepository;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-//윤근
 @Controller
 public class DeviceRegistrationController {
 
@@ -34,9 +33,6 @@ public class DeviceRegistrationController {
     public @ResponseBody
     String updateDevices(@PathVariable String pepId, @RequestBody String request, HttpServletResponse httpResponse){
 
-        System.out.println("Debug in DeviceRegister::updateDevice : 38");
-        System.out.println("Request: "+request);
-
         RequestParser parser = new RequestParser(request);
         List<JsonObject> devices = RequestParser.mapToObject(parser.getAsJsonArray());
         PEP pep = pepRepo.findOneByPepId(pepId);
@@ -52,11 +48,9 @@ public class DeviceRegistrationController {
             String devName = dev.get("deviceName").getAsString();
             String macAddr = dev.get("macAddress").getAsString();
 
-            //Device DB에 저장
             Device device = new Device(devId, devName, macAddr, pep);
             devRepo.save(device);
 
-            //DeviceAction DB에 저장
             List<JsonObject> actions = RequestParser.mapToObject(dev.get("actions").getAsJsonArray());
             updateDeviceAction(device, actions);
         });
@@ -65,15 +59,18 @@ public class DeviceRegistrationController {
 
     // 해당 device에 대한 action들 DB에 추가(DeviceAction)
     private boolean updateDeviceAction(Device device, List<JsonObject> actions) {
-        actions.forEach(act -> {
-            System.out.println("Debug in DeviceRegister::updateDeviceAction : 70");
-            System.out.println(act.toString());
-            String actionId = act.get("actionId").getAsString();  // DeviceAction.actionId
-            String actionName = act.get("actionName").getAsString(); // DeviceAction.actionName
-            String params = act.get("params").toString(); // DeviceAction.params
-            devActRepo.save(new DeviceAction(actionId, actionName, device, params));
-        });
-        return true;
+        try {
+            actions.forEach(act -> {
+                String actionId = act.get("actionId").getAsString();  // DeviceAction.actionId
+                String actionName = act.get("actionName").getAsString(); // DeviceAction.actionName
+                String params = act.get("params").toString(); // DeviceAction.params
+                devActRepo.save(new DeviceAction(actionId, actionName, device, params));
+            });
+            return true;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

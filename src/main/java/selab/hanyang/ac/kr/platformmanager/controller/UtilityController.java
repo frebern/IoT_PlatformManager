@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-//윤근
 @Controller
 public class UtilityController {
 
@@ -39,7 +38,7 @@ public class UtilityController {
 
         RequestParser parser = new RequestParser(request);
 
-        /* TODO
+        /*TODO
          * 일단 유저 정보 보내게끔 하긴 했는데
          * 이거 가지고 세션체크하는거 LoginController에서 기능 추출해서 별도의 매니저 클래스 만들어야 함.
          * */
@@ -132,7 +131,6 @@ public class UtilityController {
 
         });
 
-//        System.out.println(groups.toString());//옵저버
         return groups.toString();
     }
 

@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URISyntaxException;
 
-//윤근(수정)
 @Controller
 public class PDPController {
 
@@ -28,9 +27,6 @@ public class PDPController {
         RequestParser parser = new RequestParser(request);
         String pepId = parser.getAsString("pepId");
         JsonArray requestBody = parser.getAsJsonArray("body");
-        System.out.println("Debug in PDPController::evaluatePolicyRequest : 33");
-        System.out.println("PEP Id : " + pepId);
-        System.out.println("Request Body : " + requestBody);
 
         RequestCtx requestCtx = null;
         try {
