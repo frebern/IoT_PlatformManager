@@ -1,0 +1,38 @@
+<Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" PolicyId="SpeakerPermitPolicy"
+        RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-overrides">
+    <Target>
+        <AnyOf>
+			<AllOf>
+				<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+					<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">frebern</AttributeValue>
+					<AttributeDesignator MustBePresent="true"
+										 Category="subject"
+										 AttributeId="subject_id"
+										 DataType="http://www.w3.org/2001/XMLSchema#string" />
+				</Match>
+				<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+					<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">dev_speaker</AttributeValue>
+					<AttributeDesignator MustBePresent="true"
+										 Category="resource"
+										 AttributeId="resource_id"
+										 DataType="http://www.w3.org/2001/XMLSchema#string" />
+				</Match>
+			</AllOf>
+		</AnyOf>
+    </Target>
+    <Rule RuleId="power-permit-rule" Effect="Permit">
+        <Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">speaker_power</AttributeValue>
+						<AttributeDesignator MustBePresent="false"
+											 Category="action"
+											 AttributeId="action_id"
+											 DataType="http://www.w3.org/2001/XMLSchema#string" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+        </Target>
+    </Rule>
+</Policy>

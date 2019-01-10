@@ -94,7 +94,7 @@ public class LoginController {
 
     // 세션이 지났다면 제거.
     private void removeAllSessionExpiredUsers(){
-        loginUsers.removeIf(user -> checkTimeStamp(user.timestamp));
+        loginUsers.removeIf(user -> !checkTimeStamp(user.timestamp));
     }
 
     // 로그인한지 1시간이 넘었으면 세션 만료된 것으로 판별

@@ -79,7 +79,7 @@ public class PDPInterface {
             PDP pdp = pdpHashMap.get(pdpName);
             return pdp.evaluate(request);
         } else {
-            System.out.println("pdpName is null");
+            System.out.println("Error : No PDP Loaded");
             return null;
         }
     }
@@ -91,7 +91,7 @@ public class PDPInterface {
             PDP pdp = pdpHashMap.get(pdpName);
             return pdp.evaluate(requestCtx).encode();
         } else {
-            System.out.println("pdpName is null");
+            System.out.println("Error : No PDP Loaded");
             return null;
         }
     }
@@ -150,6 +150,9 @@ public class PDPInterface {
 
     //TODO: REST api로 제공 필요
     public boolean reloadPDP(String pdpName) {
+
+        System.out.println("[Reload PDP : "+pdpName+" ]");
+
         try {
             pdpHashMap.put(pdpName, getPDPNewInstance(pdpName));
             return true;
@@ -163,6 +166,8 @@ public class PDPInterface {
         // Set balana config file.
         String configLocation =  String.join(File.separator, ".", "conf", "pdp", "config.xml");
         System.setProperty(ConfigurationStore.PDP_CONFIG_PROPERTY, configLocation);
+
+        System.out.println("[Set PDP Configuration File Location : "+configLocation+" ]");
 
         // Create default instance of Balana
         balana = Balana.getInstance();
