@@ -8,12 +8,8 @@ object Detector {
 
   private type SatisfiableCaseSet = Set[SolverResult]
 
-  //TODO: 추후 실제 파일 로드하게끔 수정 예정
   private def loadPolicy(path:String) = {
     scala.xml.XML.load(path)
-    //아래는 추후 삭제.
-//    if(path.equals("originalPolicy")) TestPolicy.originalPolicy
-//    else TestPolicy.modifiedPolicy
   }
   private def parsePolicy(value: Elem) = {
     val policies = XACMLParser.parseAll(value)
@@ -149,5 +145,6 @@ object Detector {
     println("All Conflict Cases: ")
     println(allConflictCases)
     println("================================================================================")
+
   }
 }
